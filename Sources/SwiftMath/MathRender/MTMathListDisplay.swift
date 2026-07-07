@@ -89,13 +89,13 @@ public class MTDisplay:NSObject {
     /// The width of the display
     public var width:CGFloat = 0
     /// Position of the display with respect to the parent view or display.
-    var position = CGPoint.zero
+    public var position = CGPoint.zero
     /// The range of characters supported by this item
     public var range:NSRange=NSMakeRange(0, 0)
     /// Whether the display has a subscript/superscript following it.
     public var hasScript:Bool = false
     /// The text color for this display
-    var textColor: MTColor?
+    public var textColor: MTColor?
     /// The local color, if the color was mutated local with the color command
     var localTextColor: MTColor?
     /// The background color for this display
@@ -104,7 +104,7 @@ public class MTDisplay:NSObject {
 }
 
 /// Special class to be inherited from that implements the DownShift protocol
-class MTDisplayDS : MTDisplay, DownShift {
+public class MTDisplayDS : MTDisplay, DownShift {
     
     var shiftDown: CGFloat = 0
     
@@ -149,7 +149,7 @@ public class MTCTLineDisplay : MTDisplay {
         }
     }
     
-    override var textColor: MTColor? {
+    override public var textColor: MTColor? {
         set {
             super.textColor = newValue
             let attrStr = attributedString!.mutableCopy() as! NSMutableAttributedString
@@ -230,7 +230,7 @@ public class MTMathListDisplay : MTDisplay {
         self.recomputeDimensions()
     }
   
-    override var textColor: MTColor? {
+    override public var textColor: MTColor? {
         set {
             super.textColor = newValue
             for displayAtom in self.subDisplays {
@@ -339,7 +339,7 @@ public class MTFractionDisplay : MTDisplay {
         numerator!.position = CGPointMake(self.position.x + (self.width - numerator!.width)/2, self.position.y + self.numeratorUp)
     }
 
-    override var position: CGPoint {
+    override public var position: CGPoint {
         set {
             super.position = newValue
             self.updateDenominatorPosition()
@@ -348,7 +348,7 @@ public class MTFractionDisplay : MTDisplay {
         get { super.position }
     }
     
-    override var textColor: MTColor? {
+    override public var textColor: MTColor? {
         set {
             super.textColor = newValue
             numerator?.textColor = newValue
@@ -384,7 +384,7 @@ public class MTFractionDisplay : MTDisplay {
 // MARK: - MTRadicalDisplay
 
 /// Rendering of an MTRadical as an MTDisplay
-class MTRadicalDisplay : MTDisplay {
+public class MTRadicalDisplay : MTDisplay {
     
     /** A display representing the radicand of the radical. Its position is relative
      to the parent is not treated as a sub-display.
@@ -395,7 +395,7 @@ class MTRadicalDisplay : MTDisplay {
      */
     public fileprivate(set) var degree:MTMathListDisplay?
     
-    override var position: CGPoint {
+    override public var position: CGPoint {
         set {
             super.position = newValue
             self.updateRadicandPosition()
@@ -403,7 +403,7 @@ class MTRadicalDisplay : MTDisplay {
         get { super.position }
     }
     
-    override var textColor: MTColor? {
+    override public var textColor: MTColor? {
         set {
             super.textColor = newValue
             self.radicand?.textColor = newValue
@@ -502,7 +502,7 @@ class MTRadicalDisplay : MTDisplay {
 // MARK: - MTGlyphDisplay
 
 /// Rendering a glyph as a display
-class MTGlyphDisplay : MTDisplayDS {
+public class MTGlyphDisplay : MTDisplayDS {
     
     var glyph:CGGlyph!
     var font:MTFont?
@@ -533,12 +533,12 @@ class MTGlyphDisplay : MTDisplayDS {
         context.restoreGState();
     }
 
-    override var ascent:CGFloat {
+    override public var ascent:CGFloat {
         set { super.ascent = newValue }
         get { super.ascent - self.shiftDown }
     }
 
-    override var descent:CGFloat {
+    override public var descent:CGFloat {
         set { super.descent = newValue }
         get { super.descent + self.shiftDown }
     }
@@ -546,7 +546,7 @@ class MTGlyphDisplay : MTDisplayDS {
 
 // MARK: - MTGlyphConstructionDisplay
 
-class MTGlyphConstructionDisplay:MTDisplayDS {
+public class MTGlyphConstructionDisplay:MTDisplayDS {
     var glyphs = [CGGlyph]()
     var positions = [CGPoint]()
     var font:MTFont?
@@ -582,12 +582,12 @@ class MTGlyphConstructionDisplay:MTDisplayDS {
         context.restoreGState()
     }
     
-    override var ascent:CGFloat {
+    override public var ascent:CGFloat {
         set { super.ascent = newValue }
         get { super.ascent - self.shiftDown }
     }
 
-    override var descent:CGFloat {
+    override public var descent:CGFloat {
         set { super.descent = newValue }
         get { super.descent + self.shiftDown }
     }
@@ -597,16 +597,16 @@ class MTGlyphConstructionDisplay:MTDisplayDS {
 // MARK: - MTLargeOpLimitsDisplay
 
 /// Rendering a large operator with limits as an MTDisplay
-class MTLargeOpLimitsDisplay : MTDisplay {
+public class MTLargeOpLimitsDisplay : MTDisplay {
     
     /** A display representing the upper limit of the large operator. Its position is relative
      to the parent is not treated as a sub-display.
      */
-    var upperLimit:MTMathListDisplay?
+    public internal(set) var upperLimit:MTMathListDisplay?
     /** A display representing the lower limit of the large operator. Its position is relative
      to the parent is not treated as a sub-display.
      */
-    var lowerLimit:MTMathListDisplay?
+    public internal(set) var lowerLimit:MTMathListDisplay?
     
     var limitShift:CGFloat=0
     var upperLimitGap:CGFloat=0 { didSet { self.updateUpperLimitPosition() } }
@@ -631,7 +631,7 @@ class MTLargeOpLimitsDisplay : MTDisplay {
         self.width = maxWidth;
     }
 
-    override var ascent:CGFloat {
+    override public var ascent:CGFloat {
         set { super.ascent = newValue }
         get {
             if self.upperLimit != nil {
@@ -642,7 +642,7 @@ class MTLargeOpLimitsDisplay : MTDisplay {
         }
     }
 
-    override var descent:CGFloat {
+    override public var descent:CGFloat {
         set { super.descent = newValue }
         get {
             if self.lowerLimit != nil {
@@ -653,7 +653,7 @@ class MTLargeOpLimitsDisplay : MTDisplay {
         }
     }
     
-    override var position: CGPoint {
+    override public var position: CGPoint {
         set {
             super.position = newValue
             self.updateLowerLimitPosition()
@@ -690,7 +690,7 @@ class MTLargeOpLimitsDisplay : MTDisplay {
         nucleus?.position = CGPointMake(self.position.x + (self.width - nucleus!.width)/2, self.position.y);
     }
     
-    override var textColor: MTColor? {
+    override public var textColor: MTColor? {
         set {
             super.textColor = newValue
             self.upperLimit?.textColor = newValue
@@ -700,7 +700,7 @@ class MTLargeOpLimitsDisplay : MTDisplay {
         get { super.textColor }
     }
 
-    override func draw(_ context:CGContext) {
+    override public func draw(_ context:CGContext) {
         super.draw(context)
         // Draw the elements.
         self.upperLimit?.draw(context)
@@ -713,7 +713,7 @@ class MTLargeOpLimitsDisplay : MTDisplay {
 // MARK: - MTLineDisplay
 
 /// Rendering of an list with an overline or underline
-class MTLineDisplay : MTDisplay {
+public class MTLineDisplay : MTDisplay {
     
     /** A display representing the inner list that is underlined. Its position is relative
      to the parent is not treated as a sub-display.
@@ -730,7 +730,7 @@ class MTLineDisplay : MTDisplay {
         self.range = range;
     }
     
-    override var textColor: MTColor? {
+    override public var textColor: MTColor? {
         set {
             super.textColor = newValue
             inner?.textColor = newValue
@@ -738,7 +738,7 @@ class MTLineDisplay : MTDisplay {
         get { super.textColor }
     }
     
-    override var position: CGPoint {
+    override public var position: CGPoint {
         set {
             super.position = newValue
             self.updateInnerPosition()
@@ -746,7 +746,7 @@ class MTLineDisplay : MTDisplay {
         get { super.position }
     }
 
-    override func draw(_ context:CGContext) {
+    override public func draw(_ context:CGContext) {
         super.draw(context)
         self.inner?.draw(context)
         
@@ -775,7 +775,7 @@ class MTLineDisplay : MTDisplay {
 // MARK: - MTAccentDisplay
 
 /// Rendering an accent as a display
-class MTAccentDisplay : MTDisplay {
+public class MTAccentDisplay : MTDisplay {
     
     /** A display representing the inner list that is accented. Its position is relative
      to the parent is not treated as a sub-display.
@@ -794,7 +794,7 @@ class MTAccentDisplay : MTDisplay {
         self.range = range
     }
     
-    override var textColor: MTColor? {
+    override public var textColor: MTColor? {
         set {
             super.textColor = newValue
             accentee?.textColor = newValue
@@ -803,7 +803,7 @@ class MTAccentDisplay : MTDisplay {
         get { super.textColor }
     }
 
-    override var position: CGPoint {
+    override public var position: CGPoint {
         set {
             super.position = newValue
             self.updateAccenteePosition()
@@ -815,7 +815,7 @@ class MTAccentDisplay : MTDisplay {
         self.accentee?.position = CGPointMake(self.position.x, self.position.y);
     }
 
-    override func draw(_ context:CGContext) {
+    override public func draw(_ context:CGContext) {
         super.draw(context)
         self.accentee?.draw(context)
 

@@ -345,7 +345,7 @@ func getBboxDetails(_ bbox:CGRect, ascent:inout CGFloat, descent:inout CGFloat) 
 
 // MARK: - MTTypesetter
 
-class MTTypesetter {
+public class MTTypesetter {
     var font:MTFont!
     var displayAtoms = [MTDisplay]()
     var currentPosition = CGPoint.zero
@@ -363,7 +363,7 @@ class MTTypesetter {
     var cramped = false
     var spaced = false
     
-    static func createLineForMathList(_ mathList:MTMathList?, font:MTFont?, style:MTLineStyle) -> MTMathListDisplay? {
+    public static func createLineForMathList(_ mathList:MTMathList?, font:MTFont?, style:MTLineStyle) -> MTMathListDisplay? {
         let finalizedList = mathList?.finalized
         // default is not cramped
         return self.createLineForMathList(finalizedList, font:font, style:style, cramped:false)
