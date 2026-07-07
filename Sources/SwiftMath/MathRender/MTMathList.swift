@@ -204,12 +204,12 @@ public class MTMathAtom: NSObject {
         self.fusedAtoms = atom.fusedAtoms
     }
     
-    override init() { }
-    
+    override public init() { }
+
     /// Factory function to create an atom with a given type and value.
     /// - parameter type: The type of the atom to instantiate.
     /// - parameter value: The value of the atoms nucleus. The value is ignored for fractions and radicals.
-    init(type:MTMathAtomType, value:String) {
+    public init(type:MTMathAtomType, value:String) {
         self.type = type
         self.nucleus = type == .radical ? "" : value
     }
@@ -341,7 +341,7 @@ public class MTFraction: MTMathAtom {
         }
     }
     
-    init(hasRule rule:Bool = true) {
+    public init(hasRule rule:Bool = true) {
         super.init()
         self.type = .fraction
         self.hasRule = rule
@@ -392,7 +392,7 @@ public class MTRadical: MTMathAtom {
         self.nucleus = ""
     }
     
-    override init() {
+    override public init() {
         super.init()
         self.type = .radical
         self.nucleus = ""
@@ -439,7 +439,7 @@ public class MTLargeOperator: MTMathAtom {
         self.limits = op!.limits
     }
     
-    init(value: String, limits: Bool) {
+    public init(value: String, limits: Bool) {
         super.init(type: .largeOperator, value: value)
         self.limits = limits
     }
@@ -479,7 +479,7 @@ public class MTInner: MTMathAtom {
         self.rightBoundary = MTMathAtom(inner?.rightBoundary)
     }
     
-    override init() {
+    override public init() {
         super.init()
         self.type = .inner
     }
@@ -787,7 +787,7 @@ public class MTMathTable: MTMathAtom {
         return table
     }
     
-    init(environment: String?) {
+    public init(environment: String?) {
         super.init()
         self.type = .table
         self.environment = environment ?? ""
