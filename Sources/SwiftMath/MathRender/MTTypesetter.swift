@@ -1357,6 +1357,12 @@ public class MTTypesetter {
     // Delimiter shortfall from plain.tex
     static let kDelimiterFactor = CGFloat(901)
     static let kDelimiterShortfallPoints = CGFloat(5)
+
+    /// MathWright fork - behaviour patch, opt-in. When set, every \left/\right fence covers the
+    /// whole inner formula plus this overhang, in em of the current style's font size, at each
+    /// end (the fence target is `2 * delta + 2 * overhang * fontSize`), replacing plain TeX's
+    /// "at least 90% or at most 5pt short" rule. `nil` (the default) keeps upstream behaviour.
+    nonisolated(unsafe) public static var delimiterOverhangEm: CGFloat? = nil
     
     func makeLeftRight(_ inner: MTInner?) -> MTDisplay? {
         assert(inner!.leftBoundary != nil || inner!.rightBoundary != nil, "Inner should have a boundary to call this function");
@@ -1368,8 +1374,11 @@ public class MTTypesetter {
         let d1 = (delta / 500) * MTTypesetter.kDelimiterFactor;  // This represents atleast 90% of the formula
         let d2 = 2 * delta - MTTypesetter.kDelimiterShortfallPoints;  // This represents a shortfall of 5pt
         // The size of the delimiter glyph should cover at least 90% of the formula or
-        // be at most 5pt short.
-        let glyphHeight = max(d1, d2);
+        // be at most 5pt short - unless the MathWright overhang rule is set.
+        var glyphHeight = max(d1, d2);
+        if let overhang = MTTypesetter.delimiterOverhangEm {
+            glyphHeight = 2 * delta + 2 * overhang * styleFont.fontSize
+        }
         
         var innerElements = [MTDisplay]()
         var position = CGPoint.zero
