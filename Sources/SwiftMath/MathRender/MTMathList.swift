@@ -526,7 +526,7 @@ public class MTOverLine: MTMathAtom {
         self.innerList = MTMathList(over!.innerList)
     }
     
-    override init() {
+    override public init() {
         super.init()
         self.type = .overline
     }
@@ -549,7 +549,7 @@ public class MTUnderLine: MTMathAtom {
         self.innerList = MTMathList(under?.innerList)
     }
     
-    override init() {
+    override public init() {
         super.init()
         self.type = .underline
     }

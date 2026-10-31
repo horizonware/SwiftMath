@@ -718,7 +718,7 @@ public class MTLineDisplay : MTDisplay {
     /** A display representing the inner list that is underlined. Its position is relative
      to the parent is not treated as a sub-display.
      */
-    var inner:MTMathListDisplay?
+    public var inner:MTMathListDisplay?
     var lineShiftUp:CGFloat=0
     var lineThickness:CGFloat=0
     
@@ -780,11 +780,11 @@ public class MTAccentDisplay : MTDisplay {
     /** A display representing the inner list that is accented. Its position is relative
      to the parent is not treated as a sub-display.
      */
-    var accentee:MTMathListDisplay?
+    public var accentee:MTMathListDisplay?
     
     /** A display representing the accent. Its position is relative to the current display.
      */
-    var accent:MTGlyphDisplay?
+    public var accent:MTGlyphDisplay?
     
     init(withAccent glyph:MTGlyphDisplay?, accentee:MTMathListDisplay?, range:NSRange) {
         super.init()
