@@ -46,13 +46,36 @@ public class MTFont {
     
     /** Returns a copy of this font but with a different size. */
     public func copy(withSize size: CGFloat) -> MTFont {
+        // MathWright fork patch (1.7.3-mathwright.6): the typesetter copies the font on every style and
+        // script change, and each copy made a new CTFont and math table (about 28% of typesetting). An
+        // MTFont is never changed after it is built - its properties are set only here and in its
+        // initialisers - so copies of one font at one size are shared. The key holds the CGFont and the raw
+        // math table by identity; the cached copy retains both, so neither identity can be reused while
+        // its entry lives. Guarded by a lock (typesetting runs on any thread) and capped.
+        let key = SizeKey(cgFont: ObjectIdentifier(defaultCGFont),
+                          mathTable: rawMathTable.map { ObjectIdentifier($0) }, size: size)
+        MTFont.sizeCacheLock.lock()
+        defer { MTFont.sizeCacheLock.unlock() }
+        if let shared = MTFont.sizeCache[key] { return shared }
         let newFont = MTFont()
         newFont.defaultCGFont = self.defaultCGFont
         newFont.ctFont = CTFontCreateWithGraphicsFont(self.defaultCGFont, size, nil, nil)
         newFont.rawMathTable = self.rawMathTable
         newFont.mathTable = MTFontMathTable(withFont: newFont, mathTable: newFont.rawMathTable!)
+        if MTFont.sizeCache.count >= MTFont.sizeCacheLimit { MTFont.sizeCache.removeAll(keepingCapacity: true) }
+        MTFont.sizeCache[key] = newFont
         return newFont
     }
+
+    private struct SizeKey: Hashable {
+        let cgFont: ObjectIdentifier
+        let mathTable: ObjectIdentifier?
+        let size: CGFloat
+    }
+
+    private static let sizeCacheLock = NSLock()
+    private static var sizeCache: [SizeKey: MTFont] = [:]
+    private static let sizeCacheLimit = 256
     
     func get(nameForGlyph glyph:CGGlyph) -> String {
         let name = defaultCGFont.name(for: glyph) as? String
