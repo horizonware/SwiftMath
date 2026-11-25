@@ -83,7 +83,41 @@ public class MTFont {
     }
     
     func get(glyphWithName name:String) -> CGGlyph {
-        defaultCGFont.getGlyphWithGlyphName(name: name as CFString)
+        GlyphNameMemo.memo(for: defaultCGFont).glyph(named: name, in: defaultCGFont)
+    }
+
+    // MathWright fork patch (1.7.3-mathwright.7): `CGFontGetGlyphWithGlyphName` searches the font's glyph-name
+    // table on every call (about 7% of a maths-heavy first layout, mostly from `getVariantsForGlyph`, whose V2 path
+    // builds a fresh MTFontV2 per call). A glyph's name never changes for one CGFont, so answers are kept per CGFont.
+    // The table holds each CGFont strongly, so its identity cannot be reused while its entry lives; each memo has its
+    // own lock (fonts loaded per thread never contend on it), the table lock is held only for the lookup. Capped.
+    final class GlyphNameMemo {
+        private let lock = NSLock()
+        private var glyphs: [String: CGGlyph] = [:]
+
+        func glyph(named name: String, in font: CGFont) -> CGGlyph {
+            lock.lock()
+            if let hit = glyphs[name] { lock.unlock(); return hit }
+            lock.unlock()
+            let glyph = font.getGlyphWithGlyphName(name: name as CFString)
+            lock.lock(); glyphs[name] = glyph; lock.unlock()
+            return glyph
+        }
+
+        private static let tableLock = NSLock()
+        private static var table: [ObjectIdentifier: (font: CGFont, memo: GlyphNameMemo)] = [:]
+        private static let tableLimit = 64
+
+        static func memo(for font: CGFont) -> GlyphNameMemo {
+            let key = ObjectIdentifier(font)
+            tableLock.lock()
+            defer { tableLock.unlock() }
+            if let entry = table[key] { return entry.memo }
+            if table.count >= tableLimit { table.removeAll(keepingCapacity: true) }
+            let memo = GlyphNameMemo()
+            table[key] = (font, memo)
+            return memo
+        }
     }
     
     /** The size of this font in points. */
